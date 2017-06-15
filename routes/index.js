@@ -24,12 +24,12 @@ module.exports = io => {
   // here we basically treet the root view and tweets view as identical
   router.get('/', respondWithAllTweets);
   router.get('/tweets', respondWithAllTweets);
-
+//WHERE name=$1', ['req.params.username']
   // single-user page
   router.get('/users/:username', (req, res, next) => {
-    client.query('SELECT name, picture_url, content FROM tweets INNER JOIN users ON tweets.user_id = users.id WHERE name=$1', ['req.params.username'], function(err, result){
+    client.query('SELECT name, picture_url, content FROM tweets INNER JOIN users ON tweets.user_id = users.id WHERE name=$1', [req.params.username], function(err, result){
       if (err) return next(err);
-      var tweet = result.rows;
+      var tweets = result.rows;
       res.render('index', {
       title: 'Twitter.js',
       tweets: tweets,
@@ -40,14 +40,17 @@ module.exports = io => {
 
   });
 
-  // // single-tweet page
-  // router.get('/tweets/:id', (req, res, next) => {
-  //   const tweetsWithThatId = tweetBank.find({ id: Number(req.params.id) });
-  //   res.render('index', {
-  //     title: 'Twitter.js',
-  //     tweets: tweetsWithThatId // an array of only one element ;-)
-  //   });
-  // });
+  // single-tweet page
+  router.get('/tweets/:id', (req, res, next) => {
+    client.query('SELECT name, picture_url, content FROM tweets INNER JOIN users ON tweets.user_id = users.id WHERE tweets.id = $1', [req.params.id], function(err, result){
+      if (err) return next(err);
+      var tweets = result.rows;
+      res.render('index', {title: 'Twitter.js',
+      tweets: tweets,
+      showForm: true,
+    });
+    });
+  });
 
   // // create a new tweet
   // router.post('/tweets', (req, res, next) => {
